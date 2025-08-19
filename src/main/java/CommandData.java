@@ -1,6 +1,6 @@
 
 public enum CommandData {
-    ADD, LIST, EXIT, UPDATE, UNKNOWN;
+    ADD, LIST, EXIT, UPDATE, FILTER, UNKNOWN;
 
     public static CommandData of(String input) {
         for (CommandData command : CommandData.values()) {

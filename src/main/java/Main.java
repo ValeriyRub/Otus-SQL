@@ -14,7 +14,7 @@ public class Main {
 
       while (true) {
          System.out.println("Выберите команду:");
-         System.out.println("add/update/list/exit");
+         System.out.println("add/update/list/filter/exit");
          String input = scan.next().toUpperCase().trim();
 
          CommandData command = CommandData.of(input);
@@ -79,7 +79,7 @@ public class Main {
                }
 
                // Сохраняем животное в базу данных
-               AnimalService.saveAnimalToDB(name, age, weight, color);
+               AnimalService.saveAnimalToDB(name, age, weight, color, type);
                System.out.println("Животное добавлено в базу данных.");
             }
 
@@ -129,6 +129,18 @@ public class Main {
 
                AnimalService.updateAnimalInDB(id, name, age, weight, color);
             }
+
+            case FILTER -> {
+               System.out.println("Введите тип животного для фильтрации (cat/dog/duck):");
+               String filterType = scan.next().toLowerCase().trim();
+
+               if (!filterType.equals("cat") && !filterType.equals("dog") && !filterType.equals("duck")) {
+                  System.out.println("Неверный тип животного.");
+               } else {
+                  AnimalService.displayAnimalsByType(filterType);
+               }
+            }
+
             case EXIT -> {
                System.out.println("Завершение программы.");
                System.exit(0);

@@ -20,14 +20,14 @@ public class AnimalService {
             String username = prop.getProperty("username");
             String password = prop.getProperty("password");
 
-            String sqlQuery = "SELECT * FROM Animal";
+            String sqlQuery = "SELECT * FROM animal";
 
             try (Connection con = DriverManager.getConnection(url, username, password)) {
                 Statement statement = con.createStatement();
                 ResultSet result = statement.executeQuery(sqlQuery);
 
                 System.out.printf("%-5s %-15s %-10s %-10s %-15s%n", "id", "name", "age", "weight", "color");
-                System.out.println("--------------------------------------------------------------");
+                System.out.println("--------------------------------------------------------");
 
                 while (result.next()) {
                     System.out.printf("%-5s %-15s %-10s %-10s %-15s%n",
@@ -47,7 +47,7 @@ public class AnimalService {
         }
     }
     // Добавление животного
-    public static void saveAnimalToDB(String name, int age, int weight, String color) {
+    public static void saveAnimalToDB(String name, int age, int weight, String color, String type) {
         Properties prop = new Properties();
         try (InputStream stream = ClassLoader.getSystemResourceAsStream("myProperty.properties")) {
             if (stream == null) {
@@ -60,7 +60,7 @@ public class AnimalService {
             String username = prop.getProperty("username");
             String password = prop.getProperty("password");
 
-            String insertQuery = "INSERT INTO Animal (name, age, weight, color) VALUES (?, ?, ?, ?)";
+            String insertQuery = "INSERT INTO animal (name, age, weight, color, type) VALUES (?, ?, ?, ?, ?)";
 
             try (Connection con = DriverManager.getConnection(url, username, password)) {
                 try (PreparedStatement stmt = con.prepareStatement(insertQuery)) {
@@ -68,6 +68,7 @@ public class AnimalService {
                     stmt.setInt(2, age);
                     stmt.setInt(3, weight);
                     stmt.setString(4, color);
+                    stmt.setString(5, type);
                     stmt.executeUpdate();
                 }
 
@@ -93,7 +94,7 @@ public class AnimalService {
             String username = prop.getProperty("username");
             String password = prop.getProperty("password");
 
-            String updateQuery = "UPDATE Animal SET name = ?, age = ?, weight = ?, color = ? WHERE id = ?";
+            String updateQuery = "UPDATE animal SET name = ?, age = ?, weight = ?, color = ? WHERE id = ?";
 
             try (Connection con = DriverManager.getConnection(url, username, password)) {
                 try (PreparedStatement stmt = con.prepareStatement(updateQuery)) {
@@ -119,5 +120,55 @@ public class AnimalService {
             System.out.println("Ошибка при чтении файла свойств: " + e.getMessage());
         }
     }
+    // Фильтр животных
+    public static void displayAnimalsByType(String type) {
+        Properties prop = new Properties();
+        try (InputStream stream = ClassLoader.getSystemResourceAsStream("myProperty.properties")) {
+            if (stream == null) {
+                System.out.println("Файл конфигурации не найден.");
+                return;
+            }
+
+            prop.load(stream);
+            String url = prop.getProperty("url");
+            String username = prop.getProperty("username");
+            String password = prop.getProperty("password");
+
+            String sqlQuery = "SELECT * FROM animal WHERE type = ?";
+
+            try (Connection con = DriverManager.getConnection(url, username, password)) {
+                try (PreparedStatement stmt = con.prepareStatement(sqlQuery)) {
+                    stmt.setString(1, type);
+                    ResultSet result = stmt.executeQuery();
+
+                    System.out.printf("%-5s %-15s %-10s %-10s %-15s %-10s%n", "id", "name", "age", "weight", "color", "type");
+                    System.out.println("---------------------------------------------------------------------");
+
+                    boolean found = false;
+                    while (result.next()) {
+                        found = true;
+                        System.out.printf("%-5s %-15s %-10s %-10s %-15s %-10s%n",
+                                result.getString("id"),
+                                result.getString("name"),
+                                result.getString("age"),
+                                result.getString("weight"),
+                                result.getString("color"),
+                                result.getString("type"));
+                    }
+
+                    if (!found) {
+                        System.out.println("Животные этого типа не найдены.");
+                    }
+                }
+
+            } catch (SQLException ex) {
+                System.out.println("Ошибка при подключении к базе: " + ex.getMessage());
+            }
+
+        } catch (IOException e) {
+            System.out.println("Ошибка при чтении файла свойств: " + e.getMessage());
+        }
+    }
+
 }
 
